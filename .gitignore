@@ -64,4 +64,7 @@ tests/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Visibility local database
+.visibility/
 ```
