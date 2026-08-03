@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Visibility Event",
+  "description": "Schema for Visibility event objects",
+  "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "type",
+    "name",
+    "level",
+    "sdk"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique event identifier (UUID v4)"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC ISO 8601 timestamp"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["request", "error", "llm", "metric", "trace", "budget", "custom"],
+      "description": "Event type"
+    },
+    "name": {
+      "type": "string",
+      "description": "Stable event name identifier"
+    },
+    "level": {
+      "type": "string",
+      "enum": ["debug", "info", "warn", "error"],
+      "description": "Log level"
+    },
+    "status": {
+      "type": ["string", "null"],
+      "enum": ["success", "failure", null],
+      "description": "Operation status"
+    },
+    "duration_ms": {
+      "type": ["number", "null"],
+      "description": "Duration in milliseconds"
+    },
+    "request": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+            },
+            "url": {"type": "string"},
+            "route": {"type": "string"},
+            "status_code": {"type": "integer"},
+            "headers": {"type": "object"}
+          }
+        }
+      ],
+      "description": "Request details for request-type events"
+    },
+    "error": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "properties": {
+            "message": {"type": "string"},
+            "name": {"type": "string"},
+            "stack": {"type": "string"},
+            "code": {"type": "string"}
+          }
+        }
+      ],
+      "description": "Error details for error-type events"
+    },
+    "llm": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "properties": {
+            "provider": {"type": "string"},
+            "model": {"type": "string"},
+            "prompt_tokens": {"type": "integer"},
+            "completion_tokens": {"type": "integer"},
+            "total_tokens": {"type": "integer"},
+            "estimated_cost_usd": {"type": "number"},
+            "agent_id": {"type": "string"},
+            "session_id": {"type": "string"},
+            "tool_name": {"type": "string"}
+          }
+        }
+      ],
+      "description": "LLM call details for llm-type events"
+    },
+    "budget": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "properties": {
+            "monthly_limit_usd": {"type": "number"},
+            "used_usd": {"type": "number"},
+            "threshold": {"type": "number"},
+            "exceeded": {"type": "boolean"}
+          }
+        }
+      ],
+      "description": "Budget details for budget-type events"
+    },
+    "context": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "object"}
+      ],
+      "description": "Additional context metadata"
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Event tags for categorization"
+    },
+    "sdk": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string", "const": "visibility"},
+        "version": {"type": "string"}
+      },
+      "required": ["name", "version"],
+      "description": "SDK metadata"
+    }
+  },
+  "additionalProperties": false
+}
