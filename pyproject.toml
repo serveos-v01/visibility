@@ -46,3 +46,16 @@ where = ["src"]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_functions = "test_*"
+addopts = "-v --tb=short -p no:warnings -p no:libtmux"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::ResourceWarning",
+    "ignore::UserWarning",
+    "default::pytest.PytestCollectionWarning",
+]
+log_cli = false
+log_cli_level = "WARNING"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
