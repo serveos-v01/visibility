@@ -1,0 +1,216 @@
+Metadata-Version: 2.4
+Name: visibility
+Version: 0.1.0
+Summary: A local-first, agent-ready observability, audit, and cost-guardrail SDK for AI agents and LLM applications.
+Author: Visibility Contributors
+License: MIT
+Keywords: observability,ai-agents,llm,audit,cost-tracking,local-first
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Dynamic: license-file
+
+# Visibility 👁️
+
+> A local-first, agent-ready observability, audit, and cost-guardrail SDK for AI agents and LLM applications.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
+## Why Visibility Exists
+
+Existing observability tools are too heavy, dashboard-focused, cloud-dependent, and not agent-friendly. Visibility solves this by being:
+
+- **Lightweight** - Zero runtime dependencies, uses only Python standard library
+- **Local-first** - SQLite storage, no cloud services required
+- **Agent-ready** - Machine-readable JSON output designed for AI agents
+- **CLI-friendly** - Strict JSON output for automation and scripting
+- **Privacy-focused** - Automatic secret redaction before storage
+- **Cost-aware** - Built-in token usage and budget tracking
+
+## ✨ Features
+
+- **Request Tracking** - Track API requests with method, URL, status codes
+- **Error Tracking** - Capture errors with stack traces and error codes
+- **LLM Call Tracking** - Monitor token usage and estimated costs across providers
+- **Budget Guardrails** - Set monthly limits and receive warnings
+- **Secret Redaction** - Automatically redact sensitive keys (API keys, tokens, passwords)
+- **Event Query API** - Query stored events with filters
+- **Summary Reports** - Generate usage summaries with token counts and costs
+- **Plugin Architecture** - Extensible plugin system (ConsolePlugin, WebhookPlugin)
+- **CLI Tool** - Full CLI with schema, track, query, and summary commands
+- **Agent Integration** - OpenAI-compatible tool schemas and MCP-style manifests
+
+## 🚀 Installation
+
+```bash
+pip install visibility
+```
+
+Or install from source:
+
+```bash
+git clone https://github.com/serveos-v01/visibility.git
+cd visibility
+pip install -e ".[dev]"
+```
+
+## ⚡ Quickstart
+
+```python
+from visibility import Visibility
+
+# Initialize tracker
+v = Visibility(service_name="my-agent")
+
+# Track an LLM call
+v.track_llm(
+    name="openai.chat",
+    provider="openai",
+    model="gpt-4o-mini",
+    prompt_tokens=800,
+    completion_tokens=200
+)
+
+# Track a request
+v.track_request(
+    name="api.users.list",
+    method="GET",
+    url="/api/users",
+    status_code=200,
+    duration_ms=42
+)
+
+# Get summary
+print(v.summary())
+```
+
+## 🖥️ CLI Usage
+
+```bash
+# View tool schemas
+visibility schema
+
+# Track an event
+visibility track --json '{"type":"custom","name":"demo.event"}'
+
+# Query events
+visibility query --type=llm --limit=20
+
+# Get summary
+visibility summary
+```
+
+All CLI output is strict JSON for easy automation.
+
+## 🤖 Agent Integration
+
+Visibility exposes three tools for AI agents:
+
+1. **visibility_track** - Record events
+2. **visibility_query** - Query stored events
+3. **visibility_summary** - Generate usage summaries
+
+Example agent tool call:
+
+```python
+from visibility import execute_tool_call
+
+result = execute_tool_call({
+    "tool": "visibility_track",
+    "arguments": {
+        "type": "llm",
+        "name": "openai.chat",
+        "llm": {
+            "provider": "openai",
+            "model": "gpt-4o-mini",
+            "prompt_tokens": 800,
+            "completion_tokens": 200
+        }
+    }
+})
+```
+
+See [docs/AGENT.md](docs/AGENT.md) for detailed agent integration guide.
+
+## 📊 Event Types
+
+| Type | Description |
+|------|-------------|
+| `request` | API request tracking |
+| `error` | Error or exception capture |
+| `llm` | LLM call with token usage |
+| `metric` | Custom numeric metrics |
+| `trace` | Agent steps or trace events |
+| `budget` | Budget warnings/exceeded |
+| `custom` | Generic custom events |
+
+## 🔒 Secret Redaction
+
+Visibility automatically redacts sensitive keys:
+
+```python
+{
+    "headers": {
+        "authorization": "[REDACTED]"
+    },
+    "context": {
+        "api_key": "[REDACTED]"
+    }
+}
+```
+
+Default redacted keys: `authorization`, `token`, `api_key`, `access_token`, `refresh_token`, `password`, `secret`
+
+## 💰 Cost Tracking
+
+Built-in cost estimation for LLM calls:
+
+```python
+v = Visibility(
+    service_name="my-app",
+    monthly_usd_limit=10.0,
+    warning_threshold=0.8
+)
+```
+
+Supports custom token cost rules for different models.
+
+## 🗂️ Project Structure
+
+```
+visibility/
+├─ src/visibility/       # Core SDK
+├─ tests/                # Test suite
+├─ examples/             # Usage examples
+├─ spec/                 # JSON schemas
+├─ docs/                 # Documentation
+└─ .github/workflows/    # CI/CD
+```
+
+## 🛣️ Roadmap
+
+- [x] Phase 1: Specification and documentation
+- [ ] Phase 2: Python package base
+- [ ] Phase 3: Tracker, summary, and plugins
+- [ ] Phase 4: Agent schemas and CLI
+- [ ] Phase 5: Tests, examples, and CI
+- [ ] TypeScript SDK (future)
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## 🤝 Contributing
+
+Contributions welcome! Please read our contribution guidelines before submitting PRs.
