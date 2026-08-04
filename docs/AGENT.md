@@ -369,3 +369,63 @@ mcp_manifest = get_mcp_manifest()
 ```
 
 These schemas can be used to configure function calling in AI frameworks.
+
+---
+
+## Agent Harness Integration
+
+For production deployments, agents should integrate with the **Agent Harness** safety layer to ensure:
+
+- **Budget Compliance**: Never exceed spending limits
+- **Error Recovery**: Automatic self-correction prompts on failures
+- **Circuit Breaking**: Halt operations when error rates are too high
+- **Token Management**: Prevent runaway token consumption
+
+See [docs/harness.md](harness.md) for complete harness documentation.
+
+### Example: Safe Agent Workflow with Harness
+
+```python
+from visibility import Visibility, AgentHarness, HarnessConfig
+
+# Initialize both tracker and harness
+tracker = Visibility(service_name="safe-agent", monthly_usd_limit=10.0)
+harness = AgentHarness(
+    config=HarnessConfig(
+        budget_limit_usd=10.0,
+        max_error_rate=0.3,
+        max_tokens=50000,
+    ),
+    service_name="safe-agent",
+)
+
+def safe_llm_call(prompt: str, model: str = "gpt-4o-mini"):
+    # Pre-flight check
+    check = harness.pre_flight_check(
+        action_name="llm.completion",
+        estimated_tokens=1000,
+        estimated_cost_usd=0.05,
+    )
+    
+    if not check["allowed"]:
+        return {"blocked": True, "reason": check["reason"]}
+    
+    # Execute LLM call (your implementation)
+    result = call_your_llm_api(prompt, model)
+    
+    # Post-flight evaluation
+    eval_result = harness.post_flight_eval(
+        result=result,
+        duration_ms=1500,
+        tokens_used=950,
+        cost_usd=0.04,
+        action_name="llm.completion",
+    )
+    
+    if not eval_result["success"]:
+        # Get self-correction guidance
+        correction = eval_result["corrective_prompt"]
+        print(f"Retry hint: {correction}")
+    
+    return result
+```

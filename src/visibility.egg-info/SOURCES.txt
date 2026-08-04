@@ -5,6 +5,7 @@ src/visibility/__init__.py
 src/visibility/cli.py
 src/visibility/config.py
 src/visibility/events.py
+src/visibility/harness.py
 src/visibility/plugins.py
 src/visibility/redact.py
 src/visibility/schemas.py
@@ -17,5 +18,6 @@ src/visibility.egg-info/dependency_links.txt
 src/visibility.egg-info/entry_points.txt
 src/visibility.egg-info/requires.txt
 src/visibility.egg-info/top_level.txt
+tests/test_harness.py
 tests/test_smoke.py
 tests/test_tracker.py
